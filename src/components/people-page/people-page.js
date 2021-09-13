@@ -3,6 +3,7 @@ import SwapiService from '../../services/swapi-services'
 import ErrorIndicator from '../error-indicator/error-idicator'
 import ItemList from '../item-list'
 import PersonDetails from '../person-details'
+import Row from '../UI/Row'
 
 import './people-page.css'
 
@@ -20,28 +21,36 @@ export default class PeoplePage extends Component {
     }
 
     componentDidCatch() {
-        console.log('componentDidCatch()')
         this.setState({
             errorIndicator: true
         })
     }
 
     render() {
-        const {errorIndicator} = this.state
+        const { errorIndicator } = this.state
+        const { getData } = this.props
+
+        const itemList = (
+            <ItemList 
+                onPersonSelected={this.onTogglePerson}
+                getData={getData}
+            >
+                {(item) => (
+                    `${item.name} (${item.gender}, ${item.birthYear})`
+                )}
+            </ItemList>
+        )
+
+        const personDetails = (
+            <PersonDetails personSelected={this.state.person} />
+        ) 
         
         if (errorIndicator) {
             return <ErrorIndicator />
         }
 
         return (
-            <div className="row my-3">
-                <div className="col-md-6">
-                    <ItemList onPersonSelected={this.onTogglePerson} />
-                </div>
-                <div className="col-md-6">
-                    <PersonDetails personSelected={this.state.person} />
-                </div>
-            </div>
+            <Row left={itemList} right={personDetails} />
         )
     }
 

@@ -1,16 +1,19 @@
 import React, { Component } from 'react';
 
 import Header from '../header';
-import RandomPlanet from '../random-planet';
-import ItemList from '../item-list';
-import PersonDetails from '../person-details';
 
 import './app.css';
-import PeoplePage from '../people-page/people-page';
 import ErrorIndicator from '../error-indicator';
-import ErrorButton from '../error-button/error-button';
+import SwapiService from '../../services/swapi-services';
+import ErrorBoundary from '../error-boundry';
+import Row from '../UI/Row';
+import ItemDetails from '../item-details';
+import { Record } from '../item-details/item-details';
+import ItemList from '../item-list/item-list';
 
 export default class App extends Component {
+
+  swapi = new SwapiService()
 
   constructor() {
     super()
@@ -42,25 +45,84 @@ export default class App extends Component {
   }
 
   render() {
-    const { visible, personSelected, errorIndicator } = this.state
+    const { errorIndicator } = this.state
+    const { getPerson, getStarship, getStarshipImage, getPersonImage, getAllPeople } = this.swapi
 
     if (errorIndicator) {
-      return <ErrorIndicator />
+      return <ErrorIndicator itemList />
     }
 
+    const PersonDetail = (
+      <ItemDetails 
+        itemId={10}
+        getData={getPerson}
+        getImage={getPersonImage}
+      >
+        <Record field="gender" label="Gender" />
+        <Record field="eyeColor" label="Eye Color" />
+      </ItemDetails>
+    )
+
+    const StarshipDetail = (
+      <ItemDetails 
+        itemId={10}
+        getData={getStarship}
+        getImage={getStarshipImage}
+      >
+        <Record field="model" label="Model" />
+        <Record field="length" label="Length" />
+        <Record field="costInCredits" label="Cost" />
+      </ItemDetails>
+    )
+
     return (
-      <div className="container">
-        <Header />
-        {
-          visible ?
-          <RandomPlanet />
-          :
-          null
-        }
-        <button className="btn-lg btn-primary" onClick={this.toggleVisible}>Toggle visible</button>
-        {/* <ErrorButton /> */}
-        <PeoplePage personSelected={personSelected} />
-      </div>
+      <ErrorBoundary>
+        <div className="container">
+          <Header />
+
+          {/* <Row left={PersonDetail} right={StarshipDetail} /> */}
+          <ItemList 
+            getData={this.swapi.getAllStarships}
+            onPersonSelected={this.onPersonSelected}
+          >
+            {(item) => (
+              <span>{item.name}<button className="btn btn-secondary">!</button></span>
+            )}
+          </ItemList>
+        </div>
+      </ErrorBoundary>
     );
   }
 };
+
+// Row
+
+{/* 
+<PeoplePage 
+    getData={this.swapi.getAllPeople}
+    personSelected={personSelected}
+/> 
+
+{
+  visible ?
+  <RandomPlanet />
+  :
+  null
+}
+  <button className="btn-lg btn-primary" onClick={this.toggleVisible}>Toggle visible</button>
+
+ <div className="row my-3">
+  <div className="col-md-6">
+    <ItemList 
+      getData={this.swapi.getAllStarships}
+      onPersonSelected={this.onTogglePerson}
+    >
+      {(item) => (
+        <span>{item.name}<button className="btn btn-secondary">!</button></span>
+      )}
+    </ItemList>
+  </div>
+  <div className="col-md-6">
+    <PersonDetails personSelected={this.state.person} />
+  </div>
+</div> */}
